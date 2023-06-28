@@ -47,6 +47,10 @@ The output will look like this:
 Probably error prone, it hasn't been designed to avoid your mistakes.  
 Arguments are limited to 8 per function  
 Returns are limited to 4 per function  
-Functions are limited to 32 per file  
+Functions are limited to 128 per file  
+**Note: I might change the above so it's more dynamic**
 
 This is because it was meant to just be for my project, if you want me to increase it then just let me know.
+
+## TODO's:
+- [ ] Add `@module`. This will be placed in the file and the comments after will be inside of that module. This will be optional.

@@ -11,7 +11,7 @@
 
 constexpr unsigned char MAX_ARGS = 8;
 constexpr unsigned char MAX_RETURNS = 4;
-constexpr unsigned char MAX_FUNCS = 32;
+constexpr unsigned char MAX_FUNCS = 128;
 
 // Function Structure
 //------------------------------------------------------------------------
