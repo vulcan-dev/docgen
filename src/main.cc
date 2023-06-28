@@ -140,7 +140,8 @@ function_t extract(const std::string& comment)
         }
     }
 
-    fn.desc = fn.desc.substr(0, fn.desc.length() - 2);
+    if (!fn.desc.empty())
+        fn.desc = fn.desc.substr(0, fn.desc.length() - 2);
 
     return fn;
 }
@@ -219,7 +220,9 @@ int main(int argc, char* argv[])
 
         mehxml::node function("function");
         function.set("name", fn.name);
-        function.set("desc", fn.desc);
+
+        if (!fn.desc.empty())
+            function.set("desc", fn.desc);
 
         // Params
         for (const arg_t& arg : fn.args)
