@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <map>
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -27,6 +28,7 @@ typedef struct arg_t return_t;
 
 struct function_t
 {
+    std::string module;
     std::string name;
     std::string desc;
     arg_t args[MAX_ARGS];
@@ -49,6 +51,7 @@ void debug_print(const char* format)
 #if defined(_WIN32)
     OutputDebugStringA(format);
 #endif
+    printf(format);
 }
 
 template<typename... Args>
@@ -60,6 +63,7 @@ void debug_print(const char* format, const Args&... args)
     std::snprintf(buffer, BufferSize, format, args...);
     OutputDebugStringA(buffer);
 #endif
+    printf(buffer);
 }
 
 // Data Extraction
@@ -183,27 +187,38 @@ int main(int argc, char* argv[])
     std::ifstream file(input_file);
     std::string line;
 
-    std::string currentLine;
     bool inComment = false;
 
     function_t funcs[MAX_FUNCS];
     unsigned char num_funcs = 0;
+
+    std::string current_module = "";
+    std::string func_str = "";
     
     // Get our functions
     while (std::getline(file, line))
     {
+        int module_pos = line.find("@module");
+        if (module_pos != std::string::npos)
+        {
+            current_module = line.substr(module_pos + 8, line.length());
+            continue;
+        }
+
         if (line.find("/***") != std::string::npos)
         {
             inComment = true;
         } else if (line.find("*/") != std::string::npos)
         {
-            funcs[num_funcs++] = extract(currentLine);
+            function_t func = extract(func_str);
+            func.module = current_module;
+            funcs[num_funcs++] = func;
 
-            currentLine = "";
             inComment = false;
+            func_str = "";
         } else if (inComment)
         {
-            currentLine += line + "\n";
+            func_str += line += "\n";
         }
     }
 
@@ -212,11 +227,21 @@ int main(int argc, char* argv[])
     // mehxml, previously known as shitty xml. now has been improved.
     mehxml::node api("api");
 
+    std::map<std::string, mehxml::node> modules;
+
     // Generate the XML Data
     for (const function_t& fn : funcs)
     {
         if (fn.name.empty())
             continue;
+
+        // If we have specified "@module name" and it's not in the map, create a new node for it.
+        if (!fn.module.empty() && !modules.count(fn.module))
+        {
+            mehxml::node module_node("module");
+            module_node.set("name", fn.module);
+            modules.insert({fn.module, module_node});
+        }
 
         mehxml::node function("function");
         function.set("name", fn.name);
@@ -259,8 +284,21 @@ int main(int argc, char* argv[])
             function.append(output);
         }
 
-        api.append(function);
+        // No modules.
+        if (fn.module.empty())
+        {
+            api.append(function);
+            continue;
+        }
+
+
+        // We are using modules
+        modules.at(fn.module).append(function);
     }
+
+    // If we're using modules, append them to the root node (api)
+    for (const std::pair<std::string, mehxml::node>& module : modules)
+        api.append(module.second);
 
     std::ofstream out(output_file);
     out << api.to_str();

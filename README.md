@@ -43,6 +43,19 @@ The output will look like this:
 </api>
 ```
 
+## Modules
+To specify a module, add "@module myModule" anywhere, any comment after that will be using that module. The XML will be different, it will be separated into nodes, example:
+```xml
+<api>
+    <module name="module1">
+        ...
+    </module>
+    <module name="module2">
+        ...
+    </module>
+</api>
+```
+
 ## Notes:
 Probably error prone, it hasn't been designed to avoid your mistakes.  
 Arguments are limited to 8 per function  
@@ -53,4 +66,4 @@ Functions are limited to 128 per file
 This is because it was meant to just be for my project, if you want me to increase it then just let me know.
 
 ## TODO's:
-- [ ] Add `@module`. This will be placed in the file and the comments after will be inside of that module. This will be optional.
+- [x] Add `@module`. This will be placed in the file and the comments after will be inside of that module. This will be optional.
