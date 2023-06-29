@@ -187,7 +187,8 @@ int main(int argc, char* argv[])
     std::ifstream file(input_file);
     std::string line;
 
-    bool inComment = false;
+    bool in_comment = false;
+    int finding_name_for = -1;
 
     function_t funcs[MAX_FUNCS];
     unsigned char num_funcs = 0;
@@ -196,7 +197,7 @@ int main(int argc, char* argv[])
     std::string func_str = "";
     
     // Get our functions
-    while (std::getline(file, line))
+    while (std::getline(file, line))    
     {
         int module_pos = line.find("@module");
         if (module_pos != std::string::npos)
@@ -207,16 +208,40 @@ int main(int argc, char* argv[])
 
         if (line.find("/***") != std::string::npos)
         {
-            inComment = true;
+            in_comment = true;
+            finding_name_for = -1;
         } else if (line.find("*/") != std::string::npos)
         {
             function_t func = extract(func_str);
             func.module = current_module;
-            funcs[num_funcs++] = func;
+            funcs[num_funcs] = func;
 
-            inComment = false;
+            in_comment = false;
             func_str = "";
-        } else if (inComment)
+
+            if (func.name.empty())
+                finding_name_for = num_funcs;
+
+            num_funcs++;
+        } else if (finding_name_for > -1)
+        {
+            int opening_bracket_pos = line.find('(');
+
+            if (opening_bracket_pos != std::string::npos)
+            {
+                // Find the position of the space character preceding the opening bracket
+                size_t space_pos = line.rfind(' ', opening_bracket_pos);
+    
+                if (space_pos != std::string::npos)
+                {
+                    // Extract the function name
+                    std::string function_name = line.substr(space_pos + 1, opening_bracket_pos - space_pos - 1);
+                    funcs[finding_name_for].name = function_name;
+
+                    finding_name_for = -1;
+                }
+            }
+        } else if (in_comment)
         {
             func_str += line += "\n";
         }
@@ -304,7 +329,7 @@ int main(int argc, char* argv[])
     out << api.to_str();
     out.close();
 
-    printf("Generated! Outputting to \"%s\"\n", output_file.c_str());
+    printf("Generated %d functions! Outputting to \"%s\"\n", num_funcs, output_file.c_str());
 
     return 0;
 }

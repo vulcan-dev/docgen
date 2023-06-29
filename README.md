@@ -22,7 +22,7 @@ u32 exec(sol::this_state ts, const std::string_view sql, opt<sol::function> call
 
 The descriptions are optional for both the arguments and return values.  
 
-`@function` is not optional, this may change in the future.
+`@function` is for overwriting the function name, it will find it by default.
 
 `@param` takes the following: "name:type optional_description". Where you see `<opt>`, that's just a way for us to specify that parameter is optional. It will be removed.  
 
@@ -44,7 +44,7 @@ The output will look like this:
 ```
 
 ## Modules
-To specify a module, add "@module myModule" anywhere, any comment after that will be using that module. The XML will be different, it will be separated into nodes, example:
+To specify a module, add `@module myModule` anywhere, any comment after that will be using that module. The XML will be different, it will be separated into nodes, example:
 ```xml
 <api>
     <module name="module1">
