@@ -51,19 +51,19 @@ void debug_print(const char* format)
 #if defined(_WIN32)
     OutputDebugStringA(format);
 #endif
-    printf(format);
+    printf("%s", format);
 }
 
 template<typename... Args>
 void debug_print(const char* format, const Args&... args)
 {
-#if defined(_WIN32)
     constexpr std::size_t BufferSize = 256;
     char buffer[BufferSize];
     std::snprintf(buffer, BufferSize, format, args...);
-    OutputDebugStringA(buffer);
-#endif
-    printf(buffer);
+    #if defined(_WIN32)
+        OutputDebugStringA(buffer);
+    #endif
+    printf("%s", buffer);
 }
 
 // Data Extraction
