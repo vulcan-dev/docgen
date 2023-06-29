@@ -41,10 +41,10 @@ namespace mehxml // previously known as "shittyxml", it's had a few upgrades.
             {
                 if (result.substr(result.length()-1) == " ") // For nodes with attributes & children, it removes the space before the closing bracket
                     result.pop_back();
-                result += ">\n";
+                result += ">\r\n";
 
                 for (const auto& child : children)
-                    result += child.to_str(indent + 4) + "\n";
+                    result += child.to_str(indent + 4) + "\r\n";
 
                 result += indentation + "</" + name + ">";
             }
